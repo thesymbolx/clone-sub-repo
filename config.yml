@@ -1,0 +1,30 @@
+version: 2.1
+
+jobs:
+  unit-test:
+    working_directory: ~/code
+    docker:
+      - image: cimg/android:2024.08 # Use the latest stable image
+    steps:
+      - checkout
+      - restore_cache:
+          key: gradle-cache-{{ checksum "build.gradle" }}
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+      - run:
+          name: Run Unit Tests
+          command: ./gradlew test # Executes the unit tests
+      - save_cache:
+          key: gradle-cache-{{ checksum "build.gradle" }}
+          paths:
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
+      - store_test_results: # Stores the test results, making them visible in the CircleCI UI
+          path: app/build/test-results
+
+workflows:
+  version: 2
+  unit-test-workflow:
+    jobs:
+      - unit-test
